@@ -133,6 +133,12 @@ impl From<u8> for DegreesC {
     }
 }
 
+impl From<DegreesC> for u8 {
+    fn from(t: DegreesC) -> Self {
+        t.0
+    }
+}
+
 impl fmt::Display for DegreesC {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} C", self.0)

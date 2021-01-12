@@ -1,4 +1,5 @@
 use crate::{DegreesC, FanSpeed, UpdateIntervalSeconds};
+use log::info;
 use serde::{Deserialize, Serialize};
 use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
@@ -64,8 +65,18 @@ impl Config {
         let config: Self = toml::from_str(&content)
             .map_err(|e| ConfigLoadError::Invalid(path.as_ref().to_path_buf(), e))?;
         config.check()?;
-        // TODO
-        //log::info!("Loaded configuration file {}, ...
+        info!("Loaded configuration file {}", path.as_ref().display());
+        info!("Update interval {}", config.update_interval_seconds);
+        info!(
+            "Temperature range {}..={} C",
+            u8::from(config.temperature_min),
+            u8::from(config.temperature_max)
+        );
+        info!(
+            "Fan speed range {}..={} %",
+            u8::from(config.fan_speed_min),
+            u8::from(config.fan_speed_max)
+        );
         Ok(config)
     }
 

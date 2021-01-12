@@ -21,11 +21,16 @@ toml = "0.5"
 structopt = "0.3"
 err-derive = "0.3"
 num = "0.3"
+exitcode = "1.1"
 rppal = "0.11"
 
 [dependencies.serde]
 version = "1.0"
 features=["derive"]
+
+[dependencies.ctrlc]
+version = "3.1"
+features=["termination"]
 
 [dependencies."rpi-mailbox"]
 git = "https://github.com/jonlamb-gh/rpi-mailbox.git"

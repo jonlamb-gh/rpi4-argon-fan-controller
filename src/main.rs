@@ -1,13 +1,15 @@
 use lib::*;
-use log::info;
-use std::{fs, path::PathBuf};
+use log::{debug, error, info, warn};
+use std::sync::{
+    atomic::{AtomicUsize, Ordering},
+    Arc,
+};
+use std::{fs, path::PathBuf, process, thread, time::Duration};
 use structopt::StructOpt;
 //use rppal::i2c::I2c;
 
 // TODOs
 // - lib tests (run on the build host)
-// - wire up the error handling path to output via error!
-// - sanity check config values/ranges
 // - rm the pub's in the newtypes, To/From's
 // - turn on lint checks
 
@@ -43,7 +45,17 @@ pub struct Opts {
     pub set_fan_speed: Option<FanSpeed>,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() {
+    match do_main() {
+        Ok(()) => (),
+        Err(e) => {
+            error!("{}", e);
+            process::exit(exitcode::SOFTWARE);
+        }
+    }
+}
+
+fn do_main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn")).init();
     let opts = Opts::from_args();
 
@@ -56,6 +68,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let config = Config::load(&opts.config)?;
 
+    let running = Arc::new(AtomicUsize::new(0));
+    let r = running.clone();
+    ctrlc::set_handler(move || {
+        let prev = r.fetch_add(1, Ordering::SeqCst);
+        if prev == 0 {
+            info!("Shutting down");
+        } else {
+            warn!("Forcing exit");
+            process::exit(exitcode::SOFTWARE);
+        }
+    })?;
+
     //let mut mb = Mailbox::new(&opts.vcio)?;
 
     //let temperature = mb.temperature()?;
@@ -64,6 +88,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //let mut i2c = I2c::with_bus(I2C_BUS).unwrap();
     //i2c.set_slave_address(I2C_FAN_CTRLR_ADDR).unwrap();
     //i2c.smbus_send_byte(50).unwrap();
+
+    // sleep for 1 sec intervals, check control-c/SIGINT/SIGTERM handler
+    // do temp read fan update step every config.update_interval_seconds
+
+    while running.load(Ordering::SeqCst) == 0 {
+        thread::sleep(Duration::from_secs(1));
+
+        debug!("update");
+    }
 
     Ok(())
 }

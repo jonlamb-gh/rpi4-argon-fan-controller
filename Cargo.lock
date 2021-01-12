@@ -87,6 +87,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "cc"
+version = "1.0.66"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4c0496836a84f8d0495758516b8621a622beb77c0fed418570e50764093ced48"
+
+[[package]]
 name = "cfg-if"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -127,6 +133,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ctrlc"
+version = "3.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b57a92e9749e10f25a171adcebfafe72991d45e7ec2dcb853e8f83d9dafaeb08"
+dependencies = [
+ "nix 0.18.0",
+ "winapi",
+]
+
+[[package]]
 name = "env_logger"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -152,6 +168,12 @@ dependencies = [
  "syn",
  "synstructure",
 ]
+
+[[package]]
+name = "exitcode"
+version = "1.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de853764b47027c2e862a995c34978ffa63c1501f2e15f987ba11bd4f9bba193"
 
 [[package]]
 name = "failure"
@@ -269,6 +291,18 @@ dependencies = [
  "gcc",
  "libc",
  "void",
+]
+
+[[package]]
+name = "nix"
+version = "0.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "83450fe6a6142ddd95fb064b746083fc4ef1705fe81f64a64e1d4b39f54a1055"
+dependencies = [
+ "bitflags",
+ "cc",
+ "cfg-if 0.1.10",
+ "libc",
 ]
 
 [[package]]
@@ -422,7 +456,7 @@ dependencies = [
  "chrono",
  "failure",
  "log",
- "nix",
+ "nix 0.10.0",
 ]
 
 [[package]]
@@ -430,8 +464,10 @@ name = "rpi4-argon-fan-controller"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "ctrlc",
  "env_logger",
  "err-derive",
+ "exitcode",
  "log",
  "num",
  "rpi-mailbox",
