@@ -3,10 +3,15 @@ name = "rpi4-argon-fan-controller"
 version = "0.1.0"
 authors = ["Jon Lamb"]
 edition = "2018"
+default-run = "argon-fan-ctl"
 
 [[bin]]
 name = "argon-fan-ctl"
 path = "src/main.rs"
+
+[lib]
+name = "lib"
+path = "src/lib.rs"
 
 [dependencies]
 env_logger = "0.8"
@@ -14,6 +19,8 @@ log = "0.4"
 chrono = "0.4"
 toml = "0.5"
 structopt = "0.3"
+err-derive = "0.3"
+num = "0.3"
 rppal = "0.11"
 
 [dependencies.serde]
