@@ -1,5 +1,6 @@
 use lib::*;
 use log::{debug, error, info, warn};
+use rppal::i2c::I2c;
 use std::sync::{
     atomic::{AtomicUsize, Ordering},
     Arc,
@@ -11,7 +12,6 @@ use std::{
     time::{Duration, Instant},
 };
 use structopt::StructOpt;
-//use rppal::i2c::I2c;
 
 // TODOs
 // - lib tests (run on the build host)
@@ -85,9 +85,9 @@ fn do_main() -> Result<(), Box<dyn std::error::Error>> {
         }
     })?;
 
-    //let mut i2c = I2c::with_bus(opts.i2c_bus)?;
-    //i2c.set_slave_address(opts.i2c_addr)?
-    //let mut mb = Mailbox::new(&opts.vcio)?;
+    let mut i2c = I2c::with_bus(opts.i2c_bus.into())?;
+    i2c.set_slave_address(opts.i2c_addr.into())?;
+    let mut mb = Mailbox::new(&opts.vcio)?;
     let map = FanSpeedMap::new(
         config.temperature_min,
         config.temperature_max,
@@ -97,10 +97,9 @@ fn do_main() -> Result<(), Box<dyn std::error::Error>> {
     let mut sched = Scheduler::new(Instant::now(), config.update_interval_seconds.into());
     while running.load(Ordering::SeqCst) == 0 {
         if sched.update(Instant::now()) {
-            //let temp_c = mb.temperature()?;
-            let temp_c = DegreesC::from_f32(59.0);
+            let temp_c = DegreesC::from_f32(mb.temperature()?);
             let fan_speed = map.get(temp_c);
-            //i2c.smbus_send_byte(fan_speed.into()).unwrap();
+            i2c.smbus_send_byte(fan_speed.into()).unwrap();
 
             debug!("Temp {}, fan speed {}", temp_c, fan_speed);
         }

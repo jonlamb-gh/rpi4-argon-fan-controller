@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use std::num::{NonZeroU64, ParseIntError};
 use std::time::Duration;
 use std::{fmt, str::FromStr};
-//use rppal::i2c::I2c;
 
 mod config;
 mod fan_speed_map;
@@ -29,6 +28,12 @@ impl Default for I2cBus {
     }
 }
 
+impl From<I2cBus> for u8 {
+    fn from(bus: I2cBus) -> Self {
+        bus.0
+    }
+}
+
 impl fmt::Display for I2cBus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
@@ -50,6 +55,12 @@ pub struct I2cAddress(pub u16);
 impl Default for I2cAddress {
     fn default() -> Self {
         I2cAddress(I2C_FAN_CTRLR_ADDR)
+    }
+}
+
+impl From<I2cAddress> for u16 {
+    fn from(addr: I2cAddress) -> Self {
+        addr.0
     }
 }
 
