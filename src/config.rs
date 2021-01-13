@@ -101,6 +101,6 @@ mod test {
 
     #[test]
     fn sane_default() {
-        // TODO
+        todo!();
     }
 }

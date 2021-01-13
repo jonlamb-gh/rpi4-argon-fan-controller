@@ -5,10 +5,15 @@ use std::time::Duration;
 use std::{fmt, str::FromStr};
 //use rppal::i2c::I2c;
 
-mod mailbox;
-pub use mailbox::*;
 mod config;
+mod fan_speed_map;
+mod mailbox;
+mod scheduler;
+
 pub use config::*;
+pub use fan_speed_map::*;
+pub use mailbox::*;
+pub use scheduler::*;
 
 pub const VCIO_DEV: &str = "/dev/vcio";
 pub const I2C_BUS: u8 = 1;
@@ -83,6 +88,12 @@ pub struct FanSpeed(u8);
 
 impl FanSpeed {
     pub const MAX: Self = FanSpeed(100);
+    pub const MIN: Self = FanSpeed(0);
+
+    pub(crate) fn new_unchecked(fs: u8) -> Self {
+        debug_assert!(fs <= Self::MAX.0);
+        FanSpeed(fs)
+    }
 }
 
 impl From<FanSpeed> for u8 {
@@ -120,6 +131,9 @@ impl FromStr for FanSpeed {
 pub struct DegreesC(pub u8);
 
 impl DegreesC {
+    pub const MAX: Self = DegreesC(std::u8::MAX);
+    pub const MIN: Self = DegreesC(0);
+
     // TODO - redo this
     pub fn from_f32(t: f32) -> Self {
         let int_t = clamp(t, u8::MIN as f32, u8::MAX as f32) as u8;
@@ -195,27 +209,12 @@ impl FromStr for UpdateIntervalSeconds {
     }
 }
 
-// TODO - move this to a fn somewhere, not part of Config
-//
-// newtype for fan speed/etc
-// proptest, min < max, never exceeds max, clamps, etc
-//
-// defaults
-// tempC=fan-percent
-// 55=10
-// 60=55
-// 65=100
-//
-// clamp the f32 to min/max as a u8
-//
-// basic linear interpolate, or https://rosettacode.org/wiki/Map_range#Rust
-//pub(crate) fn interpolate_fan_speed(&self, temperature: u8) -> FanSpeed {
-//    todo!()
-//}
-
 #[cfg(test)]
 mod test {
     use super::*;
 
-    // TODO
+    #[test]
+    fn todos() {
+        todo!();
+    }
 }

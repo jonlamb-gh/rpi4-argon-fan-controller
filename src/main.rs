@@ -4,7 +4,12 @@ use std::sync::{
     atomic::{AtomicUsize, Ordering},
     Arc,
 };
-use std::{fs, path::PathBuf, process, thread, time::Duration};
+use std::{
+    fs,
+    path::PathBuf,
+    process, thread,
+    time::{Duration, Instant},
+};
 use structopt::StructOpt;
 //use rppal::i2c::I2c;
 
@@ -80,22 +85,27 @@ fn do_main() -> Result<(), Box<dyn std::error::Error>> {
         }
     })?;
 
+    //let mut i2c = I2c::with_bus(opts.i2c_bus)?;
+    //i2c.set_slave_address(opts.i2c_addr)?
     //let mut mb = Mailbox::new(&opts.vcio)?;
-
-    //let temperature = mb.temperature()?;
-    //info!("temperature: {} C", temperature);
-
-    //let mut i2c = I2c::with_bus(I2C_BUS).unwrap();
-    //i2c.set_slave_address(I2C_FAN_CTRLR_ADDR).unwrap();
-    //i2c.smbus_send_byte(50).unwrap();
-
-    // sleep for 1 sec intervals, check control-c/SIGINT/SIGTERM handler
-    // do temp read fan update step every config.update_interval_seconds
-
+    let map = FanSpeedMap::new(
+        config.temperature_min,
+        config.temperature_max,
+        config.fan_speed_min,
+        config.fan_speed_max,
+    );
+    let mut sched = Scheduler::new(Instant::now(), config.update_interval_seconds.into());
     while running.load(Ordering::SeqCst) == 0 {
-        thread::sleep(Duration::from_secs(1));
+        if sched.update(Instant::now()) {
+            //let temp_c = mb.temperature()?;
+            let temp_c = DegreesC::from_f32(59.0);
+            let fan_speed = map.get(temp_c);
+            //i2c.smbus_send_byte(fan_speed.into()).unwrap();
 
-        debug!("update");
+            debug!("Temp {}, fan speed {}", temp_c, fan_speed);
+        }
+
+        thread::sleep(Duration::from_secs(1));
     }
 
     Ok(())
