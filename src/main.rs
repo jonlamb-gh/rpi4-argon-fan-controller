@@ -46,8 +46,12 @@ pub struct Opts {
     pub write_default_config: Option<PathBuf>,
 
     /// Set the fan speed (percentage, 0..=100) and exit
-    #[structopt(long, name = "percentage")]
+    #[structopt(long, name = "percentage", conflicts_with = "get_fan_speed")]
     pub set_fan_speed: Option<FanSpeed>,
+
+    /// Print the temperature and exit
+    #[structopt(long, conflicts_with = "percentage")]
+    pub get_temp: bool,
 }
 
 fn main() {
@@ -63,6 +67,21 @@ fn main() {
 fn do_main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn")).init();
     let opts = Opts::from_args();
+
+    if let Some(fan_speed) = opts.set_fan_speed {
+        let mut i2c = I2c::with_bus(opts.i2c_bus.into())?;
+        i2c.set_slave_address(opts.i2c_addr.into())?;
+        i2c.smbus_send_byte(fan_speed.into()).unwrap();
+        debug!("Set the fan speed to {}", fan_speed);
+        return Ok(());
+    }
+
+    if opts.get_temp {
+        let mut mb = Mailbox::new(&opts.vcio)?;
+        let temp_c = mb.temperature()?;
+        println!("Temperature: {}", temp_c);
+        return Ok(());
+    }
 
     if let Some(path) = &opts.write_default_config {
         let config = Config::default();
