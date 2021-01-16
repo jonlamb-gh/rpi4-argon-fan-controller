@@ -35,3 +35,7 @@ features=["termination"]
 [dependencies."rpi-mailbox"]
 git = "https://github.com/jonlamb-gh/rpi-mailbox.git"
 branch = "aarch64"
+
+[dev-dependencies]
+proptest = "0.10"
+tempfile = "3.1"

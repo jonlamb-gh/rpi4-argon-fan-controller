@@ -42,8 +42,20 @@ impl Scheduler {
 mod test {
     use super::*;
 
+    // TODO
+    // use something like https://crates.io/crates/sn_fake_clock
+    // check that windback works
+    // schedule can repeat
+
     #[test]
-    fn todos() {
-        todo!();
+    fn tolerates_windback() {
+        let dur = Duration::from_secs(100);
+        let past = Instant::now();
+        let first = Instant::now();
+        let mut sched = Scheduler::new(first, dur);
+        assert_eq!(sched.update(Instant::now()), false);
+        assert_eq!(sched.prev, first);
+        assert_eq!(sched.update(past), false);
+        assert_eq!(sched.prev, past);
     }
 }

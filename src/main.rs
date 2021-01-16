@@ -14,14 +14,11 @@ use std::{
 use structopt::StructOpt;
 
 // TODOs
-// - lib tests (run on the build host)
 // - rm the pub's in the newtypes, To/From's
 // - turn on lint checks
+// - consider setting default min fan speed to 0/off
 
-// https://github.com/kounch/argonone/blob/feature/RaspberryPi4/argononed.py
-// https://docs.golemparts.com/rppal/0.11.2/rppal/i2c/struct.I2c.html
-// https://github.com/golemparts/rppal/blob/master/examples/i2c_ds3231.rs
-
+// ex RUST_LOG=lib,argon_fan_ctl=debug /tmp/argon-fan-ctl -c /tmp/config.toml
 #[derive(Debug, StructOpt)]
 #[structopt(name = "argon-fan-ctl", about = "Argon ONE M.2 Fan Controller")]
 pub struct Opts {
@@ -71,7 +68,7 @@ fn do_main() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(fan_speed) = opts.set_fan_speed {
         let mut i2c = I2c::with_bus(opts.i2c_bus.into())?;
         i2c.set_slave_address(opts.i2c_addr.into())?;
-        i2c.smbus_send_byte(fan_speed.into()).unwrap();
+        i2c.smbus_send_byte(fan_speed.into())?;
         debug!("Set the fan speed to {}", fan_speed);
         return Ok(());
     }
@@ -113,13 +110,17 @@ fn do_main() -> Result<(), Box<dyn std::error::Error>> {
         config.fan_speed_min,
         config.fan_speed_max,
     );
+
+    let fan_speed = FanSpeed::default();
+    debug!("Setting default fan speed {}", fan_speed);
+    i2c.smbus_send_byte(fan_speed.into())?;
+
     let mut sched = Scheduler::new(Instant::now(), config.update_interval_seconds.into());
     while running.load(Ordering::SeqCst) == 0 {
         if sched.update(Instant::now()) {
             let temp_c = DegreesC::from_f32(mb.temperature()?);
             let fan_speed = map.get(temp_c);
-            i2c.smbus_send_byte(fan_speed.into()).unwrap();
-
+            i2c.smbus_send_byte(fan_speed.into())?;
             debug!("Temp {}, fan speed {}", temp_c, fan_speed);
         }
 

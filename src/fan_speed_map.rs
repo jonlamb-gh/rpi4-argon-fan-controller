@@ -22,6 +22,9 @@ impl FanSpeedMap {
         let t_max = u8::from(temperature_max);
         let s_min = u8::from(fan_speed_min);
         let s_max = u8::from(fan_speed_max);
+        // TODO - make an error type or use Config ref
+        assert!(t_max > t_min, "Invalid temperature range");
+        assert!(s_max > s_min, "Invalid fan speed range");
 
         let mut map = HashMap::new();
         for t in t_min..=t_max {
@@ -65,9 +68,22 @@ fn map_range(from_range: (f64, f64), to_range: (f64, f64), s: f64) -> f64 {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::config::test::gen_config;
+    use crate::test::gen_degrees_c;
+    use proptest::prelude::*;
 
-    #[test]
-    fn todos() {
-        todo!();
+    proptest! {
+        #[test]
+        fn basic_mappings(config in gen_config(), temp in gen_degrees_c()) {
+            let map = FanSpeedMap::new(
+                config.temperature_min,
+                config.temperature_max,
+                config.fan_speed_min,
+                config.fan_speed_max,
+            );
+            let fs = map.get(temp);
+            prop_assert!(fs >= config.fan_speed_min);
+            prop_assert!(fs <= config.fan_speed_max);
+        }
     }
 }
