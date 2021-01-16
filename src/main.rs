@@ -1,3 +1,5 @@
+#![deny(warnings)]
+
 use lib::*;
 use log::{debug, error, info, warn};
 use rppal::i2c::I2c;
@@ -13,14 +15,18 @@ use std::{
 };
 use structopt::StructOpt;
 
-// TODOs
-// - rm the pub's in the newtypes, To/From's
-// - turn on lint checks
-// - consider setting default min fan speed to 0/off
+const ABOUT: &str = r#"Argon ONE M.2 Fan Controller
 
-// ex RUST_LOG=lib,argon_fan_ctl=debug /tmp/argon-fan-ctl -c /tmp/config.toml
+Examples:
+    Write a default configuration file
+    argon-fan-ctl --write-default-config ./config.toml
+
+    Run with debug logging
+    RUST_LOG=lib,argon_fan_ctl=debug argon-fan-ctl -c ./config.toml
+"#;
+
 #[derive(Debug, StructOpt)]
-#[structopt(name = "argon-fan-ctl", about = "Argon ONE M.2 Fan Controller")]
+#[structopt(name = "argon-fan-ctl", about = ABOUT)]
 pub struct Opts {
     /// I2C bus
     #[structopt(long, default_value)]

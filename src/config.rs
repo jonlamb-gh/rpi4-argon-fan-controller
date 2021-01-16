@@ -50,9 +50,9 @@ impl Default for Config {
     fn default() -> Self {
         Config {
             update_interval_seconds: UpdateIntervalSeconds(NonZeroU32::new(30).unwrap()),
-            temperature_min: 55.into(),
+            temperature_min: 33.into(),
             temperature_max: 65.into(),
-            fan_speed_min: FanSpeed(10),
+            fan_speed_min: FanSpeed(0),
             fan_speed_max: FanSpeed::MAX,
         }
     }
@@ -161,9 +161,9 @@ pub(crate) mod test {
             Config::default(),
             Config {
                 update_interval_seconds: UpdateIntervalSeconds(NonZeroU32::new(30).unwrap()),
-                temperature_min: 55.into(),
+                temperature_min: 33.into(),
                 temperature_max: 65.into(),
-                fan_speed_min: FanSpeed::new(10).unwrap(),
+                fan_speed_min: FanSpeed::new(0).unwrap(),
                 fan_speed_max: FanSpeed::MAX,
             }
         );

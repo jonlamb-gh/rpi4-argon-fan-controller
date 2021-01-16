@@ -1,3 +1,5 @@
+#![deny(warnings)]
+
 use num::clamp;
 use serde::{Deserialize, Serialize};
 use std::num::{NonZeroU32, ParseIntError};
