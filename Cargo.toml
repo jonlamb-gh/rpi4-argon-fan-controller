@@ -1,6 +1,6 @@
 [package]
 name = "rpi4-argon-fan-controller"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Jon Lamb"]
 edition = "2018"
 default-run = "argon-fan-ctl"
@@ -14,7 +14,7 @@ name = "lib"
 path = "src/lib.rs"
 
 [dependencies]
-env_logger = "0.8"
+env_logger = "0.9"
 log = "0.4"
 chrono = "0.4"
 toml = "0.5"
@@ -22,14 +22,14 @@ structopt = "0.3"
 err-derive = "0.3"
 num = "0.3"
 exitcode = "1.1"
-rppal = "0.11"
+rppal = "0.13"
 
 [dependencies.serde]
 version = "1.0"
 features=["derive"]
 
 [dependencies.ctrlc]
-version = "3.1"
+version = "3.2"
 features=["termination"]
 
 [dependencies."rpi-mailbox"]
